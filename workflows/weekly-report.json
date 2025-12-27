@@ -1,0 +1,196 @@
+{
+  "name": "Trello Weekly Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [5],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "trello-board-id",
+              "name": "TRELLO_BOARD_ID",
+              "value": "여기에_트렐로_보드_ID_입력",
+              "type": "string"
+            },
+            {
+              "id": "mattermost-channel-id",
+              "name": "MATTERMOST_CHANNEL_ID",
+              "value": "여기에_매터모스트_채널_ID_입력",
+              "type": "string"
+            },
+            {
+              "id": "trello-member-username",
+              "name": "TRELLO_MEMBER_USERNAME",
+              "value": "여기에_트렐로_사용자명_입력",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "id": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.TRELLO_BOARD_ID }}"
+        },
+        "returnAll": true,
+        "additionalFields": {}
+      },
+      "id": "trello-get-cards",
+      "name": "Trello - Get Cards",
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [440, 0],
+      "credentials": {
+        "trelloApi": {
+          "id": "TRELLO_CREDENTIAL_ID",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get config from Config node\nconst config = $('Config').first().json;\nconst myUsername = config.TRELLO_MEMBER_USERNAME;\n\n// Calculate date range: last Friday to this Thursday\nconst now = new Date();\nconst dayOfWeek = now.getDay();\n\n// Calculate based on this Friday\nconst thisFriday = new Date(now);\nthisFriday.setDate(now.getDate() + (5 - dayOfWeek));\nthisFriday.setHours(0, 0, 0, 0);\n\n// Last Friday (7 days ago)\nconst lastFriday = new Date(thisFriday);\nlastFriday.setDate(thisFriday.getDate() - 7);\n\n// This Thursday (day before Friday)\nconst thisThursday = new Date(thisFriday);\nthisThursday.setDate(thisFriday.getDate() - 1);\nthisThursday.setHours(23, 59, 59, 999);\n\n// Filter cards: date range + my account (member filter)\nconst filteredCards = $input.all().filter(item => {\n  const card = item.json;\n  const lastActivity = new Date(card.dateLastActivity);\n  \n  // Date range filter\n  const inDateRange = lastActivity >= lastFriday && lastActivity <= thisThursday;\n  \n  // Member filter: check if I am assigned or created the card\n  const members = card.idMembers || [];\n  const memberUsernames = card.members?.map(m => m.username) || [];\n  const isMyCard = memberUsernames.includes(myUsername) || \n                   card.idMembersVoted?.includes(myUsername) ||\n                   (card.actions && card.actions.some(a => a.memberCreator?.username === myUsername));\n  \n  // If no member info available, ignore the card\n  return inDateRange && isMyCard;\n});\n\n// Organize card information\nconst cards = filteredCards.map(item => ({\n  name: item.json.name,\n  desc: item.json.desc,\n  list: item.json.list?.name || 'Unknown',\n  labels: item.json.labels?.map(l => l.name).join(', ') || '',\n  lastActivity: item.json.dateLastActivity,\n  url: item.json.url,\n  members: item.json.members?.map(m => m.username).join(', ') || ''\n}));\n\nreturn [{\n  json: {\n    config: config,\n    period: {\n      start: lastFriday.toISOString().split('T')[0],\n      end: thisThursday.toISOString().split('T')[0]\n    },\n    cards: cards,\n    totalCount: cards.length,\n    myUsername: myUsername\n  }\n}];"
+      },
+      "id": "filter-by-date",
+      "name": "Filter Cards by Date",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "당신은 QA 엔지니어의 주간보고서 작성을 도와주는 어시스턴트입니다. Trello 카드 정보를 분석하여 체계적인 주간보고서를 작성합니다.\n\n카드 분류 기준:\n1. Redmine 일감: 카드 이름에 '#숫자' 또는 'redmine', '일감', '버그', '기능' 키워드 포함\n2. 자동화테스트: 'TestComplete', 'Playwright', 'TC', '자동화', 'Server-i', 'WebKeeper', 'PV', 'macOS' 키워드 포함\n3. 기타: 위 카테고리에 해당하지 않는 업무 (인프라, 문서화, 회의, 학습 등)\n\n상태 분류:\n- 완료: 리스트명에 'Done', '완료', 'Closed' 포함\n- 진행중: 리스트명에 'Doing', '진행', 'In Progress' 포함\n- 신규/대기: 그 외"
+            },
+            {
+              "role": "user",
+              "content": "=Trello cards for weekly report.\n\nPeriod: {{ $json.period.start }} ~ {{ $json.period.end }}\nMy username: {{ $json.myUsername }}\n\nCard list:\n{{ JSON.stringify($json.cards, null, 2) }}\n\nCreate weekly report in Korean using this format (ALL sections must use TABLE format):\n\n## Weekly Report\n**Period**: {{ $json.period.start }} ~ {{ $json.period.end }}\n\n---\n\n### 1. Redmine Tasks\n| Status | Task# | Title | Assignee | Note |\n|--------|-------|-------|----------|------|\n| (emoji) | #number | title | assignee | note |\n\n(If no cards: show 'No Redmine tasks this week')\n\n### 2. Automation Testing\n| Status | Category | Task | Note |\n|--------|----------|------|------|\n| (emoji) | Server-i/WebKeeper/PV/macOS/Other | task description | tool info |\n\n(If no cards: show 'No automation tasks this week')\n\n### 3. Other Tasks\n| Status | Category | Task | Note |\n|--------|----------|------|------|\n| (emoji) | Infra/Docs/Meeting/Learning/etc | task description | note |\n\n(If no cards: show 'No other tasks this week')\n\n### 4. Next Week Plan\n| Priority | Category | Task | Expected Date |\n|----------|----------|------|---------------|\n| 1 | category | task based on in-progress items | date |\n\nStatus emoji: Done, In Progress, New\nIMPORTANT: Output in Korean language. Card classification should be inferred by LLM even if labels are missing."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "openai-generate-report",
+      "name": "AI - Generate Report",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [880, 0],
+      "credentials": {
+        "openAiApi": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "={{ $('Config').first().json.MATTERMOST_CHANNEL_ID }}",
+        "message": "=:memo: **주간 업무 보고**\n\n{{ $json.message.content }}"
+      },
+      "id": "mattermost-send",
+      "name": "Mattermost - Send Report",
+      "type": "n8n-nodes-base.mattermost",
+      "typeVersion": 1,
+      "position": [1100, 0],
+      "credentials": {
+        "mattermostApi": {
+          "id": "MATTERMOST_CREDENTIAL_ID",
+          "name": "Mattermost account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Trello - Get Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trello - Get Cards": {
+      "main": [
+        [
+          {
+            "node": "Filter Cards by Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Cards by Date": {
+      "main": [
+        [
+          {
+            "node": "AI - Generate Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Generate Report": {
+      "main": [
+        [
+          {
+            "node": "Mattermost - Send Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}

@@ -1,0 +1,164 @@
+{
+  "name": "Weekly Report Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "매주 금요일 8시 트리거",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "options": {
+          "fields": {
+            "values": [
+              {
+                "fieldName": "target_week",
+                "fieldType": "string"
+              }
+            ]
+          }
+        }
+      },
+      "id": "manual-trigger",
+      "name": "수동 트리거 (주차 지정)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\n\n// 수동 트리거에서 주차를 입력받았는지 확인\nconst inputWeek = $input.first().json.target_week;\n\nlet startDate, endDate;\n\nif (inputWeek && inputWeek.trim() !== '') {\n  // 수동으로 입력받은 주차 사용 (YYYY-WW 형식, 예: 2025-01)\n  const parts = inputWeek.trim().split('-');\n  if (parts.length !== 2) {\n    throw new Error('주차 형식이 올바르지 않습니다. YYYY-WW 형식으로 입력해주세요. (예: 2025-01)');\n  }\n  const year = parseInt(parts[0]);\n  const weekNum = parseInt(parts[1]);\n  \n  // 해당 연도의 첫 금요일 찾기\n  let firstFriday = new Date(year, 0, 1);\n  while (firstFriday.getDay() !== 5) {\n    firstFriday = new Date(firstFriday.getTime() + 86400000);\n  }\n  \n  // 해당 주차의 금요일 (시작일)\n  startDate = new Date(firstFriday.getTime() + (weekNum - 1) * 7 * 86400000);\n  // 해당 주차의 목요일 (종료일) - 금요일부터 6일 후\n  endDate = new Date(startDate.getTime() + 6 * 86400000);\n} else {\n  // 자동 트리거인 경우 (매주 금요일 8시 실행)\n  // 지난주 금요일부터 이번주 목요일까지의 업무일지 집계\n  const today = new Date();\n  \n  // 지난주 금요일 (오늘 금요일로부터 -7일)\n  startDate = new Date(today.getTime() - 7 * 86400000);\n  // 이번주 목요일 (오늘 금요일로부터 -1일)\n  endDate = new Date(today.getTime() - 1 * 86400000);\n}\n\n// 날짜별 파일 경로 생성 (금~목, 7일간)\nconst dailyFiles = [];\nfor (let i = 0; i < 7; i++) {\n  const date = new Date(startDate.getTime() + i * 86400000);\n  const year = date.getFullYear();\n  const month = String(date.getMonth() + 1).padStart(2, '0');\n  const day = String(date.getDate()).padStart(2, '0');\n  const dateStr = `${year}-${month}-${day}`;\n  \n  const filePath = `/Users/ilseok/n8n-weekly-report/daily-worklogs/${year}-${month}/${dateStr}.md`;\n  \n  if (fs.existsSync(filePath)) {\n    dailyFiles.push({\n      date: dateStr,\n      filePath: filePath\n    });\n  }\n}\n\nif (dailyFiles.length === 0) {\n  throw new Error(`해당 주간의 업무일지를 찾을 수 없습니다. (${startDate.toISOString().split('T')[0]} ~ ${endDate.toISOString().split('T')[0]})`);\n}\n\n// 주차 정보 계산 (금요일 시작 기준)\nconst startYear = startDate.getFullYear();\nlet firstFriday = new Date(startYear, 0, 1);\nwhile (firstFriday.getDay() !== 5) {\n  firstFriday = new Date(firstFriday.getTime() + 86400000);\n}\nconst weekNumber = Math.floor((startDate.getTime() - firstFriday.getTime()) / (7 * 86400000)) + 1;\n\nreturn {\n  weekNumber: weekNumber,\n  year: startYear,\n  startDate: startDate.toISOString().split('T')[0],\n  endDate: endDate.toISOString().split('T')[0],\n  dailyFiles: dailyFiles\n};"
+      },
+      "id": "calculate-week",
+      "name": "주차 및 날짜 계산",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst dailyFiles = $input.first().json.dailyFiles;\n\n// 모든 일일 업무일지 파싱\nconst allTasks = {\n  completed: [],\n  inProgress: [],\n  nextWeek: []\n};\n\nfor (const fileInfo of dailyFiles) {\n  const fileContent = fs.readFileSync(fileInfo.filePath, 'utf8');\n  const date = fileInfo.date;\n  \n  // YAML Front Matter 파싱\n  const yamlMatch = fileContent.match(/^---\\n([\\s\\S]*?)\\n---/);\n  if (!yamlMatch) continue;\n  \n  const yamlContent = yamlMatch[1];\n  const yamlLines = yamlContent.split('\\n');\n  \n  // trello_card_mapping 파싱\n  const cardMapping = {};\n  let inMapping = false;\n  \n  for (const line of yamlLines) {\n    if (line.trim() === 'trello_card_mapping:') {\n      inMapping = true;\n      continue;\n    }\n    \n    if (inMapping) {\n      if (line.startsWith('  ') && line.includes(':')) {\n        const parts = line.trim().split(':');\n        const key = parts[0].trim();\n        const value = parts.slice(1).join(':').trim().replace(/\"/g, '');\n        cardMapping[key] = value;\n      } else if (!line.startsWith(' ')) {\n        inMapping = false;\n      }\n    }\n  }\n  \n  // 마크다운 본문 추출\n  const bodyContent = fileContent.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '');\n  \n  // \"오늘 완료한 업무\" 파싱\n  const completedSection = bodyContent.match(/## 📌 오늘 완료한 업무\\n([\\s\\S]*?)(?=\\n## |$)/);\n  if (completedSection) {\n    const tableContent = completedSection[1];\n    const rows = tableContent.split('\\n').filter(line => line.startsWith('|') && !line.includes('---'));\n    \n    for (let i = 1; i < rows.length; i++) {\n      const cells = rows[i].split('|').map(cell => cell.trim()).filter(cell => cell);\n      \n      if (cells.length >= 4) {\n        allTasks.completed.push({\n          date: date,\n          category: cells[0],\n          task: cells[1],\n          time: cells[2],\n          difficulty: cells[3]\n        });\n      }\n    }\n  }\n  \n  // \"진행 중인 업무\" 파싱\n  const inProgressSection = bodyContent.match(/## 🚧 진행 중인 업무\\n([\\s\\S]*?)(?=\\n## |$)/);\n  if (inProgressSection) {\n    const tableContent = inProgressSection[1];\n    const rows = tableContent.split('\\n').filter(line => line.startsWith('|') && !line.includes('---'));\n    \n    for (let i = 1; i < rows.length; i++) {\n      const cells = rows[i].split('|').map(cell => cell.trim()).filter(cell => cell);\n      \n      if (cells.length >= 3) {\n        allTasks.inProgress.push({\n          date: date,\n          category: cells[0],\n          task: cells[1],\n          progress: cells[2]\n        });\n      }\n    }\n  }\n  \n  // \"내일 할 일\" 파싱 (금요일만)\n  if (new Date(date).getDay() === 5) {\n    const nextSection = bodyContent.match(/## 📋 내일 할 일\\n([\\s\\S]*?)(?=\\n## |$)/);\n    if (nextSection) {\n      const tableContent = nextSection[1];\n      const rows = tableContent.split('\\n').filter(line => line.startsWith('|') && !line.includes('---'));\n      \n      for (let i = 1; i < rows.length; i++) {\n        const cells = rows[i].split('|').map(cell => cell.trim()).filter(cell => cell);\n        \n        if (cells.length >= 3) {\n          allTasks.nextWeek.push({\n            category: cells[0],\n            task: cells[1],\n            priority: cells[2]\n          });\n        }\n      }\n    }\n  }\n}\n\nreturn {\n  weekNumber: $input.first().json.weekNumber,\n  year: $input.first().json.year,\n  startDate: $input.first().json.startDate,\n  endDate: $input.first().json.endDate,\n  dailyFiles: dailyFiles.map(f => f.filePath),\n  tasks: allTasks\n};"
+      },
+      "id": "parse-worklogs",
+      "name": "업무일지 파싱",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.OPENAI_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={{ \n  {\n    \"model\": \"gpt-4o-mini\",\n    \"temperature\": 0.3,\n    \"messages\": [\n      {\n        \"role\": \"system\",\n        \"content\": \"당신은 주간 업무 보고서를 작성하는 전문가입니다. 일일 업무일지 데이터를 분석하여 회사 형식에 맞는 주간보고서를 작성합니다.\\n\\n주요 역할:\\n1. 중복 업무 통합: 같은 Redmine 일감 번호나 유사한 업무는 하나로 통합\\n2. 최신 상태 반영: 여러 날에 걸쳐 진행된 업무는 최종 상태로 업데이트\\n3. 시간 집계: 같은 업무에 소요된 총 시간 계산\\n4. 카테고리별 분류: Redmine, 자동화, 기타 업무로 명확히 구분\\n5. 주요 성과 요약: 가장 중요한 업무 3-5개 선별\\n6. 특이사항 감지: 일정 지연, 예상외 이슈, 중요 결정 등 자동 파악\\n\\n출력 형식은 반드시 마크다운이어야 하며, YAML Front Matter를 포함해야 합니다.\"\n      },\n      {\n        \"role\": \"user\",\n        \"content\": `주간보고서를 작성해주세요.\\n\\n## 기본 정보\\n- 주차: ${$input.first().json.year}년 ${$input.first().json.weekNumber}주차\\n- 기간: ${$input.first().json.startDate} ~ ${$input.first().json.endDate}\\n- 작성자: ilseok\\n\\n## 파싱된 업무 데이터\\n\\n### 완료한 업무\\n${JSON.stringify($input.first().json.tasks.completed, null, 2)}\\n\\n### 진행 중인 업무\\n${JSON.stringify($input.first().json.tasks.inProgress, null, 2)}\\n\\n### 다음 주 계획\\n${JSON.stringify($input.first().json.tasks.nextWeek, null, 2)}\\n\\n## 작성 요구사항\\n\\n1. **YAML Front Matter 포함**: week_number, year, start_date, end_date, author, generated_at 필드 포함\\n2. **중복 제거**: 같은 Redmine 일감(예: #123)이 여러 날 나타나면 하나로 통합하고 총 소요 시간 합산\\n3. **상태 업데이트**: 진행 중인 업무가 완료로 바뀐 경우 최신 상태 반영\\n4. **카테고리별 테이블**:\\n   - Redmine 일감: | 상태 | 일감번호 | 제목 | 담당자 | 비고 |\\n   - 자동화 테스트 (Server-i, WebKeeper, PV 등): | 상태 | 분류 | 업무 내용 | 비고 |\\n   - 기타 업무: | 상태 | 분류 | 업무 내용 | 비고 |\\n5. **다음 주 계획**: | 우선순위 | 분류 | 업무 내용 | 예상 완료일 |\\n6. **주간 요약**:\\n   - 통계: 총 작업 시간, 완료 업무 수, 진행 중 업무 수\\n   - 주요 성과: 가장 중요한 3-5개 업무 (시간이 오래 걸렸거나 난이도가 높은 업무 우선)\\n   - 특이사항: 예상치 못한 이슈, 일정 변경, 중요 결정 등 자동 감지하여 작성\\n\\n반드시 한국어로 작성하고, 마크다운 형식을 준수하세요.`\n      }\n    ]\n  }\n}}",
+        "options": {}
+      },
+      "id": "openai-generate",
+      "name": "AI 주간보고서 생성",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst weekNumber = $input.first().json.weekNumber;\nconst year = $input.first().json.year;\n\n// OpenAI API 응답에서 생성된 보고서 추출\nconst openaiResponse = $input.first().json;\nconst weeklyReport = openaiResponse.choices[0].message.content;\n\n// 주간 보고서 디렉토리 생성\nconst reportsDir = `/Users/ilseok/n8n-weekly-report/weekly-reports/${year}`;\nif (!fs.existsSync(reportsDir)) {\n  fs.mkdirSync(reportsDir, { recursive: true });\n}\n\n// 파일명: YYYY-WW.md\nconst weekNumStr = String(weekNumber).padStart(2, '0');\nconst fileName = `${year}-${weekNumStr}.md`;\nconst filePath = `${reportsDir}/${fileName}`;\n\n// 파일 저장\nfs.writeFileSync(filePath, weeklyReport, 'utf8');\n\nreturn {\n  filePath: filePath,\n  fileName: fileName,\n  weekNumber: weekNumber,\n  year: year,\n  status: 'success',\n  message: `AI가 생성한 주간 보고서가 저장되었습니다: ${fileName}`\n};"
+      },
+      "id": "save-report",
+      "name": "주간 보고서 저장",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "매주 금요일 8시 트리거": {
+      "main": [
+        [
+          {
+            "node": "주차 및 날짜 계산",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "수동 트리거 (주차 지정)": {
+      "main": [
+        [
+          {
+            "node": "주차 및 날짜 계산",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주차 및 날짜 계산": {
+      "main": [
+        [
+          {
+            "node": "업무일지 파싱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "업무일지 파싱": {
+      "main": [
+        [
+          {
+            "node": "AI 주간보고서 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 주간보고서 생성": {
+      "main": [
+        [
+          {
+            "node": "주간 보고서 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
