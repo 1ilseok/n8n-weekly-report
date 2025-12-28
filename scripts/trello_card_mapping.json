@@ -1,0 +1,572 @@
+{
+  "1": {
+    "shortLink": "2YxVCI8h",
+    "name": "SiteList 검증 자동화",
+    "id": "5fc84357ceb0d60c997b8d78"
+  },
+  "2": {
+    "shortLink": "BOgeZBSc",
+    "name": "사내 모니터링 시스템 고도화",
+    "id": "5fc84361544f2a761448eb18"
+  },
+  "3": {
+    "shortLink": "A1MaAOY5",
+    "name": "Server-i Two-tier 고도화",
+    "id": "5fc84374ecf1291513a1ec25"
+  },
+  "4": {
+    "shortLink": "W3LB4CX7",
+    "name": "Regression Test 최적화",
+    "id": "5fc843a29080708c2a03a747"
+  },
+  "5": {
+    "shortLink": "JTm2NO2b",
+    "name": "Automation API convert to RestAPI",
+    "id": "5fc843daa321da8ed56dd843"
+  },
+  "6": {
+    "shortLink": "l3spW9r3",
+    "name": "자동화 시스템 통합 모니터링 (Grafana)",
+    "id": "5fc88025bb04e62b7ed47537"
+  },
+  "7": {
+    "shortLink": "lQZgf9DB",
+    "name": "T-Proxy 정책 시험",
+    "id": "5fc88047d8b4d028aa90abb8"
+  },
+  "8": {
+    "shortLink": "b5C1OVev",
+    "name": "BMT, POC 대용량 샘플 파일 시험",
+    "id": "5fc880a9a51632747864869e"
+  },
+  "9": {
+    "shortLink": "VHYpqMEd",
+    "name": "Privacy-i MacOS Agent 자동화",
+    "id": "5fc880cb306efa2c6eef2d33"
+  },
+  "10": {
+    "shortLink": "MQrVLOQs",
+    "name": "통합 에이전트 프로토콜 현황조사",
+    "id": "5fc89fc65591e67f1f18d0c6"
+  },
+  "11": {
+    "shortLink": "yKvK7YXp",
+    "name": "T-Proxy 장시간 안정성 시험",
+    "id": "5fc984c3c0b3d75cbae46c70"
+  },
+  "12": {
+    "shortLink": "ghANIODj",
+    "name": "Privacy-i EDR 시험 환경 구성",
+    "id": "5fc98a75d95d980d96463ce9"
+  },
+  "13": {
+    "shortLink": "lQm50vAc",
+    "name": "AQA Network DNS SERVER 구축",
+    "id": "5fc9999bb016cf6e748cc075"
+  },
+  "14": {
+    "shortLink": "6c5cwIf0",
+    "name": "Server-i TestComplete 자동화",
+    "id": "5fc9dea98491cd09f9f9bda2"
+  },
+  "15": {
+    "shortLink": "oKwGLwcs",
+    "name": "Mail-i TestComplete 자동화",
+    "id": "5fc9deaff69c635916f94d45"
+  },
+  "16": {
+    "shortLink": "x9C9dHNV",
+    "name": "Webkeeper TestComplete 자동화",
+    "id": "5fc9deb6a30ca604e5377889"
+  },
+  "17": {
+    "shortLink": "ByfnepAP",
+    "name": "Privacy-i TestComplete 자동화",
+    "id": "5fc9dec1507384210d3f9e4c"
+  },
+  "18": {
+    "shortLink": "nPIqcXpp",
+    "name": "DB-i TestComplete 자동화",
+    "id": "5fc9deefc6c3fe3ac5d784c4"
+  },
+  "19": {
+    "shortLink": "9bRswr3J",
+    "name": "T-Proxy 실시간 정책 적용 자동화",
+    "id": "5fc9def810169d7227a4156b"
+  },
+  "20": {
+    "shortLink": "n35z8cKM",
+    "name": "Mail-i 프로토콜 자동화",
+    "id": "5fc9e21a29693e55d2a72a84"
+  },
+  "22": {
+    "shortLink": "zZDdFxv0",
+    "name": "T-Proxy 성능 자동 시험",
+    "id": "5fc9e28e82b32d2da77945fc"
+  },
+  "24": {
+    "shortLink": "2xdDC1mW",
+    "name": "서버 패키지 작업",
+    "id": "5fc9e2cf8a44550da43bd285"
+  },
+  "25": {
+    "shortLink": "MSwPvGZ8",
+    "name": "RPA 자동화",
+    "id": "5fc9e2ff80abfc1a06e26d42"
+  },
+  "26": {
+    "shortLink": "ecOOmZ7L",
+    "name": "신규 릴리즈 알림 기능",
+    "id": "5fc9e30f750cde129a5a9f39"
+  },
+  "29": {
+    "shortLink": "AbosVtNE",
+    "name": "일 단위 패키지 시험 로직",
+    "id": "5fcd8f2489e4b6743b6cb9be"
+  },
+  "30": {
+    "shortLink": "LzmXDEKq",
+    "name": "내 PC지키미 Stable 이관",
+    "id": "5fcf457e4642f83d19070c87"
+  },
+  "31": {
+    "shortLink": "rRE85Zq3",
+    "name": "DB-i 프로토콜 자동화",
+    "id": "5fd0a5b6c31c4f6c9a38bd45"
+  },
+  "32": {
+    "shortLink": "P3dHVyXx",
+    "name": "sphinx 구축",
+    "id": "5fd74296233b535bd0fe0e45"
+  },
+  "33": {
+    "shortLink": "p5iMZFkR",
+    "name": "Mail-i 프로토콜 현황 조사",
+    "id": "5fd9dafd547e013c92bb0db2"
+  },
+  "34": {
+    "shortLink": "YVG4S8NK",
+    "name": "Privacy-i 주기적 시험",
+    "id": "5fd9db0f044cb785d95da7f2"
+  },
+  "35": {
+    "shortLink": "eytSiUCn",
+    "name": "Server-i 사이트별 커스터마이징 관리",
+    "id": "5fd9db1ab278b981df2a4d6a"
+  },
+  "36": {
+    "shortLink": "rhUobE6E",
+    "name": "Browser Version check 작업",
+    "id": "5fe1bcb01e8ed61791e73abc"
+  },
+  "37": {
+    "shortLink": "uskuZvwf",
+    "name": "사이트 지원",
+    "id": "5fe3e1bfab5fb858bf2fa981"
+  },
+  "38": {
+    "shortLink": "1vWlJ3yH",
+    "name": "통합 에이전트 자동화",
+    "id": "5ffd57eed1b3d62f8e6acc3b"
+  },
+  "40": {
+    "shortLink": "Lv1j08Ng",
+    "name": "SQL Commit마다 스키마 생성/업데이트 비교 자동화",
+    "id": "6005c293e776d56d07d8a362"
+  },
+  "41": {
+    "shortLink": "VZAS6bSk",
+    "name": "Server-i Agent Smoke 자동화",
+    "id": "601a682c4ccc6786722a5bad"
+  },
+  "42": {
+    "shortLink": "MYyR0kgh",
+    "name": "SiteList 검증 자동화 유지보수",
+    "id": "603379f8239d614ddd186562"
+  },
+  "43": {
+    "shortLink": "pIxhDVqq",
+    "name": "EDR Zero-day Attack Test",
+    "id": "60471d53b05a1814fc155b57"
+  },
+  "44": {
+    "shortLink": "HGUlJ4IM",
+    "name": "타부서 지원",
+    "id": "604891b2eade46794d8ec589"
+  },
+  "45": {
+    "shortLink": "ThLevzyf",
+    "name": "EDR GS 인증",
+    "id": "604f21a66e331257b3db8384"
+  },
+  "48": {
+    "shortLink": "9FuGloSa",
+    "name": "EDR 모니터링 툴",
+    "id": "604f2288ee6bc14dfb62617d"
+  },
+  "49": {
+    "shortLink": "FNqqPchn",
+    "name": "SiteList 검증 자동화 (확장)",
+    "id": "6051ca13d205825fa9013c37"
+  },
+  "50": {
+    "shortLink": "p6jXvlwl",
+    "name": "내PC지키미 GS 인증",
+    "id": "6059b36c5b32278e1269dd1c"
+  },
+  "51": {
+    "shortLink": "FDtRz6Iz",
+    "name": "WK_GS인증",
+    "id": "606ecdfa0628be092d8518e5"
+  },
+  "52": {
+    "shortLink": "uxrjImlG",
+    "name": "CM TestComplete 자동화",
+    "id": "607ff9dc29eb0931a1a66423"
+  },
+  "53": {
+    "shortLink": "FOKaidps",
+    "name": "RootKit 파일 변경 알림",
+    "id": "60b053e9b6e3f1834b64de92"
+  },
+  "54": {
+    "shortLink": "yENbEPB5",
+    "name": "Privacy-i 분석 시간 스모크 테스트",
+    "id": "60b5bede29468f4f23463b3b"
+  },
+  "56": {
+    "shortLink": "VBomFlYG",
+    "name": "Server-i BMT, POC 대용량 샘플 파일 시험 개선(재수행 시 시간 단축 확인)",
+    "id": "60d53f14fd158c8d6695556e"
+  },
+  "57": {
+    "shortLink": "ZjuBcc8a",
+    "name": "BMT, POC 대용량 샘플 파일 시험 자동화 유지보수",
+    "id": "610273899a39c347871d48bd"
+  },
+  "58": {
+    "shortLink": "APQBm59R",
+    "name": "EDR 탐지성능 자동화",
+    "id": "610bacf00e76cc286e80daa2"
+  },
+  "59": {
+    "shortLink": "aVBNX9DF",
+    "name": "시스템 테스트",
+    "id": "61260ad066efe61b0966ba7a"
+  },
+  "60": {
+    "shortLink": "07zqSAhX",
+    "name": "Privacy-i OCR 자동화 구현",
+    "id": "613186c9a60d52457745cd4f"
+  },
+  "61": {
+    "shortLink": "togdFWXs",
+    "name": "모듈 수시 자동화 시험",
+    "id": "6152debc12ee0a765a0fd646"
+  },
+  "62": {
+    "shortLink": "W2BP7wgs",
+    "name": "mqtt 성능 측정",
+    "id": "61791ccd3fc2620b658e1a5b"
+  },
+  "63": {
+    "shortLink": "F5yiWg3W",
+    "name": "김일석 주임 입사 업무 파악",
+    "id": "617fa8649bc672430ddbba06"
+  },
+  "64": {
+    "shortLink": "ad8CT3l7",
+    "name": "우선순위 Testcase 작업",
+    "id": "618e0df04f62e82c4e641059"
+  },
+  "65": {
+    "shortLink": "Pv7gZfNy",
+    "name": "차 순위 Testcase 작업",
+    "id": "618e0e05a7b5740f6fab0d27"
+  },
+  "66": {
+    "shortLink": "rBjIIl12",
+    "name": "Release 패키지 프로세스 정리",
+    "id": "61a967843cccde2fcc0f4542"
+  },
+  "67": {
+    "shortLink": "WWMVRIw2",
+    "name": "IE to Edge TestComplete 자동화 변경",
+    "id": "61a9759594f3ea46930c9335"
+  },
+  "68": {
+    "shortLink": "vEJhPzUI",
+    "name": "패키지 인수인계",
+    "id": "61a97f34fad63966e9f71127"
+  },
+  "69": {
+    "shortLink": "EipFmYhK",
+    "name": "시스템 테스트 (사용종료 각 제품 사용)",
+    "id": "61a97f5f7d33d9301d5d3b7a"
+  },
+  "70": {
+    "shortLink": "btvK9LHQ",
+    "name": "Privacy-i MacOS DLP 기능 자동화",
+    "id": "61a97fbb4ed4b20a2b35ef9a"
+  },
+  "71": {
+    "shortLink": "7sSgrmH4",
+    "name": "자동화 통합 모니터링 시스템",
+    "id": "61a97ff59c605b5509db0597"
+  },
+  "72": {
+    "shortLink": "C2WyOeZJ",
+    "name": "Privacy-i Agent 자동화 주기적 업데이트 자동화",
+    "id": "61a98016e75248273a250030"
+  },
+  "73": {
+    "shortLink": "YGF9IY5u",
+    "name": "제품 모니터링 툴",
+    "id": "61a9c2d0f05c480acd21a618"
+  },
+  "74": {
+    "shortLink": "PepODzWV",
+    "name": "기타 업무",
+    "id": "61af2ac243672022e08ce810"
+  },
+  "75": {
+    "shortLink": "m9SLgQr4",
+    "name": "강다연 인턴 업무 파악",
+    "id": "61e650a0d76b14532b00cb6b"
+  },
+  "76": {
+    "shortLink": "2XA2AlPA",
+    "name": "제품 모니터링 자동화",
+    "id": "61ef44c8f7cf9610373222be"
+  },
+  "78": {
+    "shortLink": "spHfREIv",
+    "name": "EDR 보안기능확인서",
+    "id": "62135b9068a679188e7756a3"
+  },
+  "79": {
+    "shortLink": "GTuMti3c",
+    "name": "제품 간 검출 비교 자동화 구현",
+    "id": "62147694b9f7874129d77b03"
+  },
+  "80": {
+    "shortLink": "KOoKxEbj",
+    "name": "시스템 테스트",
+    "id": "623846371996615f5ea6d96c"
+  },
+  "81": {
+    "shortLink": "2sGNhfDE",
+    "name": "Privacy-i EDR 일감",
+    "id": "624b998b71604a44ab717826"
+  },
+  "82": {
+    "shortLink": "taC5O892",
+    "name": "제품 설치 자동화",
+    "id": "624c139fb8315f6ba5fb28f7"
+  },
+  "85": {
+    "shortLink": "R921huZf",
+    "name": "macOS 에이전트 일감",
+    "id": "628b45daa0e8aa82ac56b1bc"
+  },
+  "87": {
+    "shortLink": "xz95ePO9",
+    "name": "EDR 릴리즈",
+    "id": "62a6fc153088468587105891"
+  },
+  "88": {
+    "shortLink": "N5twKWSF",
+    "name": "고객사 납품 지원",
+    "id": "62a6fc7cd57db012b1d851b8"
+  },
+  "89": {
+    "shortLink": "OYxV20o9",
+    "name": "UI.Vision RPA Test Report 자동화",
+    "id": "62b035ef29d02668581860c4"
+  },
+  "92": {
+    "shortLink": "EVSFlPjx",
+    "name": "DLPCenter / CM 이슈",
+    "id": "62c7ed7794a3988875580739"
+  },
+  "94": {
+    "shortLink": "7Vd7fxAd",
+    "name": "Somansa Endpoint 로그 수집기",
+    "id": "62e79608824b265adeaeba45"
+  },
+  "96": {
+    "shortLink": "ci0DjydE",
+    "name": "자동화 배포용 Dockerfile 템플릿 작업",
+    "id": "62eb87cc15268c5ecc7aa754"
+  },
+  "97": {
+    "shortLink": "5KSFepHC",
+    "name": "Privacy-i EDR 업무",
+    "id": "63282f7c1410fd0126c37f37"
+  },
+  "100": {
+    "shortLink": "qGCQdfFu",
+    "name": "ReadtheDocs 문서화",
+    "id": "6369b960d32a520238410464"
+  },
+  "101": {
+    "shortLink": "wLR699OM",
+    "name": "Privacy-i EDR POC/BMT",
+    "id": "638477412c03f1018f77a8f2"
+  },
+  "102": {
+    "shortLink": "uxTkfSlo",
+    "name": "Privacy-i EDR TestComplete 자동화",
+    "id": "63857cb42996d501554dee52"
+  },
+  "103": {
+    "shortLink": "39Mv4Mss",
+    "name": "openssl 버전 up. PIServer 성능 시험",
+    "id": "63c7a64123b1b9019ef987c2"
+  },
+  "104": {
+    "shortLink": "fWjczmaH",
+    "name": "Apache httpd/Tomcat /OpenSSL 최신version check 및 패키지 자동 반영화",
+    "id": "641821678cc235085e2bf439"
+  },
+  "105": {
+    "shortLink": "O0mnG5ef",
+    "name": "INA ChatGPT 접속 확인 자동화",
+    "id": "64269fdcfed1660420001fb7"
+  },
+  "107": {
+    "shortLink": "EiMubSMM",
+    "name": "AQA API Server 유지보수",
+    "id": "6475baa5668fb10a00285db3"
+  },
+  "110": {
+    "shortLink": "H4Z59LWy",
+    "name": "postgresql11/14 data migration 및 패키지 반영",
+    "id": "64be3ed41dfb5345f015f0a6"
+  },
+  "112": {
+    "shortLink": "jxcYm9at",
+    "name": "DLPCenter 정책 생성 자동화",
+    "id": "65cdd27a3c7acfd51675d512"
+  },
+  "113": {
+    "shortLink": "DlbNF0W9",
+    "name": "Privacy-i 24년 1차 릴리즈",
+    "id": "661cf016189b2ed3361830d7"
+  },
+  "114": {
+    "shortLink": "mFQmAnZ7",
+    "name": "somansa custom shell 개발",
+    "id": "6662bdbc92ac66e2334fabf4"
+  },
+  "115": {
+    "shortLink": "b76ENYeJ",
+    "name": "취약점 대응조치",
+    "id": "66681345106d5deb19a0edac"
+  },
+  "116": {
+    "shortLink": "d314Va1A",
+    "name": "Privacy-i EDR 랜섬웨어 인증",
+    "id": "6708f4bb48201b8d71879d73"
+  },
+  "117": {
+    "shortLink": "GdMuWFmq",
+    "name": "DB Update Test 자동화 (신규 PG Script Update 모듈)",
+    "id": "670f72dbf0966a64db59cd99"
+  },
+  "118": {
+    "shortLink": "d8aCsmnP",
+    "name": "생성형 AI 프로토콜 자동화",
+    "id": "674d7a85358be8f519229c93"
+  },
+  "119": {
+    "shortLink": "NbxH2bHI",
+    "name": "openstack automation with ansible",
+    "id": "67500e1e241baa71d4c44279"
+  },
+  "120": {
+    "shortLink": "8bPjGA17",
+    "name": "최상하 선임 입사 업무 파악",
+    "id": "67862895083c975b60c3bc87"
+  },
+  "121": {
+    "shortLink": "rEJVGxeR",
+    "name": "Playwright 자동화 (공통)",
+    "id": "67b2ec7a20255fa24f8f8418"
+  },
+  "122": {
+    "shortLink": "g2itS5cq",
+    "name": "DB-i 시스템 테스트",
+    "id": "67b8408d33104966a5b3cbf2"
+  },
+  "123": {
+    "shortLink": "K3pQzm7a",
+    "name": "Mail-i 시스템 테스트",
+    "id": "67b840995e2d33aaac022839"
+  },
+  "124": {
+    "shortLink": "Nr8XxOmv",
+    "name": "WebKeeper 시스템 테스트",
+    "id": "67b8409fd1ccbc65daa506cd"
+  },
+  "125": {
+    "shortLink": "JGOrBpSw",
+    "name": "Privacy-i/Server-i 시스템 테스트",
+    "id": "67b840aba9a211b6b8aece69"
+  },
+  "126": {
+    "shortLink": "tC2l6YQE",
+    "name": "Privacy-i EDR 자동화",
+    "id": "67c6b01b2378ef5cd3ebb431"
+  },
+  "127": {
+    "shortLink": "5BFychyK",
+    "name": "EDR 시스템 테스트",
+    "id": "67ecfd40eaff80d7a273bab1"
+  },
+  "128": {
+    "shortLink": "1s8nZIjE",
+    "name": "AI 기반 스크립트 유지보수 자동화",
+    "id": "67ff6760cd960d99f021a092"
+  },
+  "129": {
+    "shortLink": "XfBBu6Hp",
+    "name": "Privacy-i 일감",
+    "id": "6806099d8d9463f87e03d26f"
+  },
+  "130": {
+    "shortLink": "eJDYXVA0",
+    "name": "김원용 주임 입사 업무 파악",
+    "id": "68074ee7278a788b335e73f7"
+  },
+  "131": {
+    "shortLink": "s4lnGdgS",
+    "name": "Webkeeper Playwright 자동화",
+    "id": "6847e6c18741067408b3eba9"
+  },
+  "132": {
+    "shortLink": "T5QVODYu",
+    "name": "DB-i Playwright 자동화",
+    "id": "68512eea45a55b205027b4a8"
+  },
+  "133": {
+    "shortLink": "Y8fY6kH2",
+    "name": "EDR Playwright 자동화",
+    "id": "687df539fe78e6c5bd071ded"
+  },
+  "134": {
+    "shortLink": "rahZtVjA",
+    "name": "Mail-i Playwright 자동화",
+    "id": "68999e9729cb50cd018591e5"
+  },
+  "135": {
+    "shortLink": "Fm7ibzNb",
+    "name": "DB-i 에이전트 자동화",
+    "id": "68a43e0d7f08b4b0ef499acc"
+  },
+  "136": {
+    "shortLink": "bAx4dy2W",
+    "name": "아름 외부망 자동화 환경 구축",
+    "id": "68ecb0a5ac50df446bb65da1"
+  }
+}

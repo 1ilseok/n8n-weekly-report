@@ -1,0 +1,379 @@
+{
+  "name": "Daily Worklog to Trello v3 (카테고리 기반 AI 선택)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "매일 18시 트리거",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "options": {
+          "fields": {
+            "values": [
+              {
+                "fieldName": "target_date",
+                "fieldType": "string"
+              }
+            ]
+          }
+        }
+      },
+      "id": "manual-trigger",
+      "name": "수동 트리거 (날짜 지정 가능)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\n\n// 수동 트리거에서 날짜를 입력받았는지 확인\nconst inputDate = $input.first().json.target_date;\n\nlet year, month, day, dateStr;\n\nif (inputDate && inputDate.trim() !== '') {\n  // 수동으로 입력받은 날짜 사용 (YYYY-MM-DD 형식)\n  const parts = inputDate.trim().split('-');\n  if (parts.length !== 3) {\n    throw new Error('날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식으로 입력해주세요.');\n  }\n  year = parseInt(parts[0]);\n  month = parts[1];\n  day = parts[2];\n  dateStr = inputDate.trim();\n} else {\n  // 자동 트리거인 경우 오늘 날짜 사용\n  const today = new Date();\n  year = today.getFullYear();\n  month = String(today.getMonth() + 1).padStart(2, '0');\n  day = String(today.getDate()).padStart(2, '0');\n  dateStr = `${year}-${month}-${day}`;\n}\n\nconst filePath = `/Users/ilseok/내 드라이브/n8n-weekly-report/daily-worklogs/${year}-${month}/${dateStr}.md`;\n\n// 파일 존재 확인\nif (!fs.existsSync(filePath)) {\n  throw new Error(`파일을 찾을 수 없습니다: ${filePath}`);\n}\n\n// 파일 읽기\nconst fileContent = fs.readFileSync(filePath, 'utf8');\n\nreturn {\n  date: dateStr,\n  year: year,\n  month: month,\n  filePath: filePath,\n  fileContent: fileContent\n};"
+      },
+      "id": "read-worklog",
+      "name": "업무일지 읽기",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fileContent = $input.first().json.fileContent;\nconst filePath = $input.first().json.filePath;\nconst date = $input.first().json.date;\n\n// YAML Front Matter 파싱\nconst yamlMatch = fileContent.match(/^---\\n([\\s\\S]*?)\\n---/);\nif (!yamlMatch) {\n  throw new Error('YAML Front Matter를 찾을 수 없습니다.');\n}\n\nconst yamlContent = yamlMatch[1];\nconst yamlLines = yamlContent.split('\\n');\n\n// trello_synced 확인\nlet isSynced = false;\nfor (const line of yamlLines) {\n  if (line.trim().startsWith('trello_synced:')) {\n    const value = line.split(':')[1].trim();\n    isSynced = (value === 'true');\n    break;\n  }\n}\n\nif (isSynced) {\n  return [];\n}\n\n// trello_card_mapping 파싱 (업무명: 짧은ID 형식)\nconst cardMapping = {};\nlet inMapping = false;\n\nfor (let i = 0; i < yamlLines.length; i++) {\n  const line = yamlLines[i];\n  \n  if (line.trim() === 'trello_card_mapping:') {\n    inMapping = true;\n    continue;\n  }\n  \n  if (inMapping) {\n    // 주석 라인 건너뛰기\n    if (line.trim().startsWith('#')) {\n      continue;\n    }\n    \n    // 다음 섹션(category 등)이 시작되면 종료\n    if (line.trim().endsWith(':') && !line.startsWith(' ')) {\n      inMapping = false;\n      break;\n    }\n    \n    if (line.startsWith('  ') && line.includes(':')) {\n      const colonIndex = line.indexOf(':');\n      const key = line.substring(0, colonIndex).trim();\n      const value = line.substring(colonIndex + 1).trim().replace(/\"/g, '');\n      \n      if (key && value && value !== '여기에_카드ID_입력') {\n        cardMapping[key] = value;\n      }\n    }\n  }\n}\n\n// category 파싱 (카테고리명: [짧은ID 리스트] 형식)\nconst categoryMapping = {};\nlet inCategory = false;\n\nfor (let i = 0; i < yamlLines.length; i++) {\n  const line = yamlLines[i];\n  \n  if (line.trim() === 'category:') {\n    inCategory = true;\n    continue;\n  }\n  \n  if (inCategory) {\n    // 주석 라인 건너뛰기\n    if (line.trim().startsWith('#')) {\n      continue;\n    }\n    \n    // 다음 섹션이 시작되면 종료\n    if (line.trim().endsWith(':') && !line.startsWith(' ')) {\n      inCategory = false;\n      break;\n    }\n    \n    if (line.startsWith('  ') && line.includes(':')) {\n      const colonIndex = line.indexOf(':');\n      const key = line.substring(0, colonIndex).trim();\n      const valueStr = line.substring(colonIndex + 1).trim();\n      \n      try {\n        // JSON 배열 파싱\n        const value = JSON.parse(valueStr);\n        if (Array.isArray(value) && key) {\n          categoryMapping[key] = value;\n        }\n      } catch (e) {\n        console.error(`카테고리 파싱 오류 (${key}):`, e);\n      }\n    }\n  }\n}\n\n// 마크다운 본문 추출\nconst bodyContent = fileContent.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '');\n\n// \"업무 현황\" 테이블 파싱 (통합 테이블)\nconst workSection = bodyContent.match(/## 📊 업무 현황\\n([\\s\\S]*?)(?=\\n## |$)/);\nconst tasks = [];\n\nif (workSection) {\n  const tableContent = workSection[1];\n  const rows = tableContent.split('\\n').filter(line => line.startsWith('|') && !line.includes('---'));\n  \n  // 헤더 제외하고 데이터 행만 처리\n  for (let i = 1; i < rows.length; i++) {\n    const cells = rows[i].split('|').map(cell => cell.trim()).filter(cell => cell);\n    \n    // 상태 | 카테고리 | 업무 내용 | 우선순위 | 난이도 | 소요시간 | 진도 | 예상 완료일\n    if (cells.length >= 8) {\n      const status = cells[0];\n      const category = cells[1];\n      const task = cells[2];\n      const priority = cells[3];\n      const difficulty = cells[4];\n      const time = cells[5];\n      const progress = cells[6];\n      const dueDate = cells[7];\n      \n      // 해당 카테고리의 카드 ID 리스트 가져오기\n      const categoryCardIds = categoryMapping[category] || [];\n      \n      // 카테고리의 카드 ID에 해당하는 카드명-ID 매핑 생성\n      const availableCards = {};\n      \n      // 1. 카테고리에 해당하는 카드만 포함\n      for (const [cardName, cardId] of Object.entries(cardMapping)) {\n        if (categoryCardIds.includes(cardId)) {\n          availableCards[cardName] = cardId;\n        }\n      }\n      \n      // 2. 카테고리 정보가 없거나 매칭되는 카드가 없으면 전체 카드 제공\n      if (Object.keys(availableCards).length === 0) {\n        Object.assign(availableCards, cardMapping);\n      }\n      \n      tasks.push({\n        status: status,\n        category: category,\n        task: task,\n        priority: priority,\n        difficulty: difficulty,\n        time: time,\n        progress: progress,\n        dueDate: dueDate,\n        filePath: filePath,\n        date: date,\n        availableCards: availableCards,  // 카테고리 기반으로 필터링된 카드 목록\n        allCards: cardMapping  // 전체 카드 목록 (디버깅용)\n      });\n    }\n  }\n}\n\nif (tasks.length === 0) {\n  return [];\n}\n\nreturn tasks.map(task => ({ json: task }));"
+      },
+      "id": "parse-content",
+      "name": "업무일지 파싱 (카테고리 기반)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-tasks",
+      "name": "업무 항목 반복",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=다음 업무 내용을 분석하고, 가장 관련성이 높은 Trello 카드를 선택해주세요.\n\n**업무 정보:**\n- 상태: {{ $json.status }}\n- 카테고리: {{ $json.category }}\n- 업무 내용: {{ $json.task }}\n- 우선순위: {{ $json.priority }}\n- 난이도: {{ $json.difficulty }}\n- 소요시간: {{ $json.time }}\n- 진도: {{ $json.progress }}\n- 예상 완료일: {{ $json.dueDate }}\n\n**해당 카테고리({{ $json.category }})에서 선택 가능한 Trello 카드:**\n{{ JSON.stringify($json.availableCards, null, 2) }}\n\n**요구사항:**\n1. 위의 선택 가능한 카드 중에서 업무 내용과 가장 적합한 카드를 1개 선택\n2. 업무 내용의 키워드와 카드명을 매칭하여 선택\n3. 관련성이 높은 카드가 없다면 \"기타 업무\" 카드 선택\n4. 반드시 선택 가능한 카드 목록에 있는 카드만 선택\n5. JSON 형식으로만 응답: {\"selectedCard\": \"카드명\", \"shortLink\": \"짧은ID\"}\n\n**응답 예시:**\n{\"selectedCard\": \"Privacy-i MacOS Agent 자동화\", \"shortLink\": \"VHYpqMEd\"}",
+        "options": {
+          "systemMessage": "당신은 업무 내용을 분석하여 적절한 Trello 카드를 선택하는 AI 어시스턴트입니다. 항상 JSON 형식으로만 응답하세요. 반드시 제공된 카드 목록에서만 선택해야 합니다."
+        }
+      },
+      "id": "ai-select-card",
+      "name": "AI 카드 선택 (카테고리 기반)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [1120, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = $input.first().json.response;\nconst originalData = $input.first().json;\n\n// AI 응답 파싱\nlet selectedCard;\ntry {\n  // JSON 형식 추출 (코드 블록 제거)\n  const jsonMatch = aiResponse.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    selectedCard = JSON.parse(jsonMatch[0]);\n  } else {\n    throw new Error('JSON 형식을 찾을 수 없습니다.');\n  }\n} catch (error) {\n  // 파싱 실패 시 기본값 사용 (기타 업무 카드)\n  console.error('AI 응답 파싱 실패:', error);\n  selectedCard = {\n    selectedCard: \"기타 업무\",\n    shortLink: originalData.availableCards[\"기타 업무\"] || originalData.allCards[\"기타 업무\"] || \"PepODzWV\"\n  };\n}\n\nreturn {\n  status: originalData.status,\n  category: originalData.category,\n  task: originalData.task,\n  priority: originalData.priority,\n  difficulty: originalData.difficulty,\n  time: originalData.time,\n  progress: originalData.progress,\n  dueDate: originalData.dueDate,\n  date: originalData.date,\n  filePath: originalData.filePath,\n  selectedCardName: selectedCard.selectedCard,\n  shortLink: selectedCard.shortLink\n};"
+      },
+      "id": "parse-ai-response",
+      "name": "AI 응답 파싱",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.trello.com/1/cards/{{ $json.shortLink }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "=a8dfec8230225111cb4b4f9272db3192"
+            },
+            {
+              "name": "token",
+              "value": "=ATTA6305660ff802054079b9f055800877d7ee11a4624ee4560c78cbc1225218549d69FC000D"
+            },
+            {
+              "name": "fields",
+              "value": "id,name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-card-id",
+      "name": "짧은ID로 긴ID 조회",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.trello.com/1/cards/{{ $json.id }}/actions/comments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=📌 상태: {{ $node['AI 응답 파싱'].json.status }}\\n📝 업무 내용: {{ $node['AI 응답 파싱'].json.task }}\\n📊 진도: {{ $node['AI 응답 파싱'].json.progress }}\\n⚡ 우선순위: {{ $node['AI 응답 파싱'].json.priority }} | 난이도: {{ $node['AI 응답 파싱'].json.difficulty }}\\n⏱️ 소요시간: {{ $node['AI 응답 파싱'].json.time }}\\n📅 작업일: {{ $node['AI 응답 파싱'].json.date }} | 예상 완료일: {{ $node['AI 응답 파싱'].json.dueDate }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "=a8dfec8230225111cb4b4f9272db3192"
+            },
+            {
+              "name": "token",
+              "value": "=ATTA6305660ff802054079b9f055800877d7ee11a4624ee4560c78cbc1225218549d69FC000D"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "add-trello-comment",
+      "name": "Trello 댓글 추가",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.trello.com/1/cards/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "=a8dfec8230225111cb4b4f9272db3192"
+            },
+            {
+              "name": "token",
+              "value": "=ATTA6305660ff802054079b9f055800877d7ee11a4624ee4560c78cbc1225218549d69FC000D"
+            },
+            {
+              "name": "idList",
+              "value": "5fc8430caeb8b073ed11d2be"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "move-card-to-in-progress",
+      "name": "카드를 '진행 중'으로 이동",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $node['업무 항목 반복'].json.done }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-loop-done",
+      "name": "반복 완료 확인",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [2220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst filePath = $node['AI 응답 파싱'].json.filePath;\n\n// 파일 읽기\nlet fileContent = fs.readFileSync(filePath, 'utf8');\n\n// trello_synced: false를 true로 변경\nfileContent = fileContent.replace(/trello_synced:\\s*false/, 'trello_synced: true');\n\n// 파일 쓰기\nfs.writeFileSync(filePath, fileContent, 'utf8');\n\nreturn {\n  filePath: filePath,\n  status: 'synced',\n  message: 'Trello 동기화 완료'\n};"
+      },
+      "id": "update-sync-status",
+      "name": "동기화 상태 업데이트",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 200]
+    },
+    {
+      "parameters": {},
+      "id": "no-op",
+      "name": "계속 반복",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2440, 400]
+    }
+  ],
+  "connections": {
+    "매일 18시 트리거": {
+      "main": [
+        [
+          {
+            "node": "업무일지 읽기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "수동 트리거 (날짜 지정 가능)": {
+      "main": [
+        [
+          {
+            "node": "업무일지 읽기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "업무일지 읽기": {
+      "main": [
+        [
+          {
+            "node": "업무일지 파싱 (카테고리 기반)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "업무일지 파싱 (카테고리 기반)": {
+      "main": [
+        [
+          {
+            "node": "업무 항목 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "업무 항목 반복": {
+      "main": [
+        [
+          {
+            "node": "AI 카드 선택 (카테고리 기반)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 카드 선택 (카테고리 기반)": {
+      "main": [
+        [
+          {
+            "node": "AI 응답 파싱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 응답 파싱": {
+      "main": [
+        [
+          {
+            "node": "짧은ID로 긴ID 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "짧은ID로 긴ID 조회": {
+      "main": [
+        [
+          {
+            "node": "Trello 댓글 추가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trello 댓글 추가": {
+      "main": [
+        [
+          {
+            "node": "카드를 '진행 중'으로 이동",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "카드를 '진행 중'으로 이동": {
+      "main": [
+        [
+          {
+            "node": "반복 완료 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "반복 완료 확인": {
+      "main": [
+        [
+          {
+            "node": "동기화 상태 업데이트",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "계속 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "계속 반복": {
+      "main": [
+        [
+          {
+            "node": "업무 항목 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
