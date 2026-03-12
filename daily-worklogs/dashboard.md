@@ -1,87 +1,46 @@
-- 추후 : briefit에 대기업 기술블로그 (토스, 우아한형제 등) 추가
 
-- DB 복원실패현상 팀장님 문의 (Maili에서 최초 발견)
-- AI 기반 스크립트 유지보수 자동화
-    - 차주에 원용씨가 모든 프로토콜 job에 대해서, 한번이라도 성공 시키면 그 이후로 모니터링해서 유지보수 기능 확인해보는 것으로.
-- macos 유지보수 계획
-    - airdrop 제외
-    - usbctl 적용
-        
-        ```jsx
-        # 1. 홈브루를 통해 설치
-        brew install uhubctl
-        
-        # 2. 연결된 허브 정보 출력 (지원 여부 확인)
-        sudo uhubctl
-        
-        # 3. 출력 결과
-        aqa@AQAM1iMac ~ % sudo uhubctl
-        Password:
-        
-        Current status for hub 0-2 [050d:092c Belkin International Belkin USB-C Multimedia Hub 000000000, USB 3.20, 4 ports, ppps]
-        
-          Port 1: 02a0 power 5gbps Rx.Detect
-        
-          Port 2: 02a0 power 5gbps Rx.Detect
-        
-          Port 3: 02a0 power 5gbps Rx.Detect
-        
-          Port 4: 0203 power 5gbps U0 enable connect [0bda:8153 Realtek USB 10/100/1000 LAN 001000001]
-        
-        Current status for hub 0-1 [050d:092b Belkin International Belkin USB-C Multimedia Hub 000000000, USB 2.10, 4 ports, ppps]
-        
-          Port 1: 0100 power
-        
-          Port 2: 0503 power highspeed enable connect [05ac:12a8 Apple Inc. iPhone 0000811000145C9401A2401E]
-        
-          Port 3: 0503 power highspeed enable connect [13fd:0840 Generic External 534243343730383336312020]
-        
-          Port 4: 0503 power highspeed enable connect [1a40:0101 USB 2.0 Hub, USB 2.00, 4 ports, ganged]
-        
-        Current status for hub 1-1 [050d:090b CE-Link USB-C HUB, USB 2.10, 4 ports, ppps]
-        
-          Port 1: 0100 power
-        
-          Port 2: 0100 power
-        
-          Port 3: 0100 power
-        
-          Port 4: 0103 power enable connect [046d:c534 Logitech USB Receiver]
-        
-        Current status for hub 1-2 [050d:090c CE-Link USB-C HUB, USB 3.00, 4 ports, ppps]
-        
-          Port 1: 02a0 power 5gbps Rx.Detect
-        
-          Port 2: 02a0 power 5gbps Rx.Detect
-        
-          Port 3: 0203 power 5gbps U0 enable connect [0781:5567  USB  SanDisk 3.2Gen1 0901c0efaeb0d0509fae40b909f575123321be1d23412ae9e977c6131fa5d1b]
-        
-          Port 4: 02a0 power 5gbps Rx.Detect
-        ```
-        
-        ```jsx
-        # iPhone 재부팅
-        sudo uhubctl -l 0-1 -p 2 -a cycle
-        
-        # SanDisk USB 메모리 재부팅
-        sudo uhubctl -l 1-2 -p 3 -a cycle
-        ```
-        
-    - playwright 전환
+## Elasticsearch 기동 실패 - write.lock 문제 해결 메모
 
-읽어보기
+**환경:** Elasticsearch 5.6.17 / 데이터 경로 `/somansa/data/es_data`
 
-https://toss.tech/article/ai-driven-ui-test-automation
+### 증상
 
-briefit - 대기업 기술블로그 (토스, 우아한형제 등) 추가
+ES 서비스 기동 시 9200 포트 미응답, 아래 두 가지 에러 로그 발생.
 
----
+**① 노드 기동 단계 실패**
+```
+IllegalStateException: failed to obtain node locks,
+tried [[/somansa/data/es_data/SMS_LogServer]] with lock id [0]
+```
 
----
+**② 샤드 복구 단계 실패**
+```
+LockObtainFailedException: Lock held by another program:
+/somansa/data/es_data/nodes/0/indices/{uuid}/{shard}/index/write.lock
+```
 
-- macos는 사이트별로 사용하지 않을 기능 xml 파일 보고 tc 스킵하도록
-- wk 기능리스트 관련, 비즈니스 로직은 1팀 QA 담당에게 문의
-- playwright bdd 자동화 실월간 발표자료 작성.
-    - allure report 보여주고, bdd가 어떤건지도 보여주고, Gherkin 문법적인 내용도 포함되면 좋을 것.
-    - BDD란? 기획자가 시나리오를 작성하고, QA가 필터링하고 이거를 개발자가 그대로 개발.
-- 연말에 glusterfs 관련 somansa-shell 수정 (glusterfs 관련 소유권 확인해보기) (`sudo gluster peer probe var_1`)
+### 원인
+
+ES가 비정상 종료되면서 Lucene이 생성한 `write.lock` 파일이 삭제되지 않고 잔존. 재기동 시 해당 lock을 획득하지 못해 샤드 복구 전체 실패.
+
+### 해결 절차
+```bash
+# 1. ES 완전 종료
+systemctl stop elasticsearch
+
+# 2. 잔존 프로세스 확인
+ps -ef | grep elasticsearch | grep -v grep
+
+# 3. write.lock 일괄 삭제
+find /somansa/data/es_data/nodes/0/indices -name "write.lock" -exec rm -f {} \;
+
+# 4. ES 재시작 및 로그 확인
+systemctl start elasticsearch
+journalctl -u elasticsearch -f
+```
+
+### 주의사항
+
+- `write.lock`은 OS 레벨 Native Lock이므로, **ES 프로세스를 완전히 종료한 후** 삭제해야 함
+- 프로세스가 살아있는 상태에서 lock 파일만 삭제해도 락은 해제되지 않음
+- 재발 방지를 위해 ES는 항상 `systemctl stop`으로 정상 종료할 것
