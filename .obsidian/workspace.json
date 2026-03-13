@@ -1,0 +1,239 @@
+{
+  "main": {
+    "id": "b99bd8c14c1b8f68",
+    "type": "split",
+    "children": [
+      {
+        "id": "60a929687d5bf61d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b61f91bbf6a1a8ef",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      },
+      {
+        "id": "05dcd7500034ee0b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8e57f43a20fc1ea7",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "40868d98fc0aec5a",
+    "type": "split",
+    "children": [
+      {
+        "id": "35662bd227401cc3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cb0bb2662deae927",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "d8c79100a96caade",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "7489bd41f603ef3f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "3fe8622f7066fb72",
+    "type": "split",
+    "children": [
+      {
+        "id": "3896bc6f5ff4a2c4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0f14057a03a6476b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "README.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for README"
+            }
+          },
+          {
+            "id": "389e85a465de83ae",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from README"
+            }
+          },
+          {
+            "id": "23be77744c8aa665",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "6ba55fec73133c0d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "d0f855e4a40588cd",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "README.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of README"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b61f91bbf6a1a8ef",
+  "lastOpenFiles": [
+    "workflows/daily-to-trello-v3.json",
+    "workflows/daily-to-trello-v2.json",
+    "scripts/trello_list_info.json",
+    "scripts/trello_card_mapping.json",
+    "scripts/fetch_trello_lists.py",
+    "scripts/fetch_trello_cards.py",
+    "scripts/convert_card_numbers.py",
+    "scripts",
+    "docs/implementation-summary.md",
+    "docs",
+    "data/week-01-29.png",
+    "data/week-01-22.png",
+    "data",
+    "daily-worklogs/markmap-test.md",
+    "daily-worklogs/dashboard.md",
+    "daily-worklogs/2026-03/2026-03-12.md",
+    "daily-worklogs/2026-03/2026-03-11.md",
+    "daily-worklogs/2026-03/2026-03-10.md",
+    "daily-worklogs/2026-03/2026-03-09.md",
+    "daily-worklogs/2026-03/2026-03-06.md",
+    "daily-worklogs/2026-03/2026-03-05.md",
+    "daily-worklogs/2026-03/2026-03-04.md",
+    "daily-worklogs/2026-03/2026-03-03.md",
+    "daily-worklogs/2026-03",
+    "daily-worklogs/2026-02/2026-02-27.md",
+    "daily-worklogs/2026-02/2026-02-26.md",
+    "daily-worklogs/2026-02/2026-02-25.md",
+    "daily-worklogs/2026-02/2026-02-24.md",
+    "daily-worklogs/2026-02/2026-02-23.md",
+    "daily-worklogs/2026-02/2026-02-20.md",
+    "daily-worklogs/2026-02/2026-02-19.md",
+    "daily-worklogs/2026-02/2026-02-13.md",
+    "daily-worklogs/2026-02/2026-02-12.md",
+    "daily-worklogs/2026-02/2026-02-10.md",
+    "daily-worklogs/2026-02/2026-02-11.md",
+    "daily-worklogs/2026-02/2026-02-09.md",
+    "daily-worklogs/2026-02/2026-02-06.md",
+    "daily-worklogs/2026-02/2026-02-05.md"
+  ]
+}
