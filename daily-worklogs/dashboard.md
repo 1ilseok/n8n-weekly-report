@@ -1,4 +1,7 @@
 
+
+# Elasticsearch
+
 ## Elasticsearch 기동 실패 - write.lock 문제 해결 메모
 
 **환경:** Elasticsearch 5.6.17 / 데이터 경로 `/somansa/data/es_data`
@@ -44,3 +47,13 @@ journalctl -u elasticsearch -f
 - `write.lock`은 OS 레벨 Native Lock이므로, **ES 프로세스를 완전히 종료한 후** 삭제해야 함
 - 프로세스가 살아있는 상태에서 lock 파일만 삭제해도 락은 해제되지 않음
 - 재발 방지를 위해 ES는 항상 `systemctl stop`으로 정상 종료할 것
+
+---
+
+# Jenkins
+
+## "곧 Jenkins가 종료될 예정입니다" 배너가 나타날 경우
+- http://<Jenkins주소>/cancelQuietDown 접속
+- "Retry using POST" 버튼을 클릭하여 취소
+- ThinBackup이 완료되지 못하고 있는 것과 관련이 있음.
+- **위와 같이 해봤지만, 다시 배너가 나타남. 결국 jenkins restart가 답.
